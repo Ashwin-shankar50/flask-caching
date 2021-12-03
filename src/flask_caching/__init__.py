@@ -546,18 +546,19 @@ class Cache:
                 return cache_key
 
             def _make_cache_key(args, kwargs, use_request):
+                cache_key = str()
                 if query_string:
-                    return _make_cache_key_query_string()
-                else:
-                    if callable(key_prefix):
-                        cache_key = key_prefix()
-                    elif "%s" in key_prefix:
-                        if use_request:
-                            cache_key = key_prefix % request.path
-                        else:
-                            cache_key = key_prefix % url_for(f.__name__, **kwargs)
+                    cache_key = _make_cache_key_query_string()
+
+                if callable(key_prefix):
+                    cache_key += key_prefix()
+                elif "%s" in key_prefix:
+                    if use_request:
+                        cache_key += key_prefix % request.path
                     else:
-                        cache_key = key_prefix
+                        cache_key += key_prefix % url_for(f.__name__, **kwargs)
+                else:
+                    cache_key += key_prefix
 
                 if source_check and callable(f):
                     func_source_code = inspect.getsource(f)
